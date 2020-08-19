@@ -1,0 +1,79 @@
+﻿<div class="row">
+    <div class="col-md-12">
+        <table class="table" id="peopleTable">
+            <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Created Date Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="3">Calling API for data...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="row">
+    <form id="createPerson" onsubmit="insertPerson()">
+        <div class="form-group">
+            <label for="personName">Name</label>
+            <input type="text" class="form-control" id="personName" aria-describedby="personHelp">
+            <small id="personHelp" class="form-text text-muted">Name can be a maximum of 50 characters.</small>
+        </div>
+        <button type="button" onclick="insertPerson()" class="btn btn-primary">Insert Person</button>
+    </form>
+</div>
+
+@section scripts {
+    <script>
+        // GET PERSONS
+        function getPersons() {
+            $.ajax({
+                url: 'https://localhost:44341/api/person',
+                method: 'GET',
+                success: function (persons) {
+                    // Re-load data table with return objects
+                    $('#peopleTable').hide();
+
+                    $('#peopleTable tbody tr').remove();
+
+                    for (i = 0; i < persons.length; i++) {
+                        var p = persons[i];
+
+                        $('#peopleTable tbody').append('<tr><td>' + p.PersonID + '</td><td>' + p.Name + '</td><td>' + p.CreatedDateTime + '</td></tr>');
+                    }
+
+                    // Fade table in - slightly friendlier to user
+                    $('#peopleTable').fadeIn();
+
+                    // re-focus on text box to allow multiple submissions in a row
+                    $("#personName").focus();
+                }
+            });
+        }
+
+        function insertPerson() {
+            var pName = $("#personName").val();
+
+            $.ajax({
+                url: 'https://localhost:44341/api/person',
+                method: 'POST',
+                contentType: 'application/json',
+                data: '"' + pName + '"', // Using [FromBody] in controller requires the "name" to be the only content in request
+                success: function () {
+                    getPersons(); // re-load table
+                }
+            });            
+        }
+
+
+        $(function() {
+            getPersons(); // init table
+        });
+
+    </script>
+}
